@@ -24,8 +24,8 @@ if (! defined('ABSPATH')) {
                     'fallback_cb'    => static function () {
                         echo '<ul class="ab-nav-list">';
                         echo '<li><a href="' . esc_url(home_url('/')) . '">Home</a></li>';
-                        echo '<li><a href="' . esc_url(home_url('/about/')) . '">About</a></li>';
                         echo '<li><a href="' . esc_url(home_url('/books/')) . '">Books</a></li>';
+                        echo '<li><a href="' . esc_url(home_url('/about/')) . '">About</a></li>';
                         echo '</ul>';
                     },
                 ]);

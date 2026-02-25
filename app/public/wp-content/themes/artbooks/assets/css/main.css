@@ -1,13 +1,13 @@
 :root {
-  --ab-cream: #ffd7a8;
-  --ab-orange: #f45a2f;
-  --ab-orange-deep: #e94d2a;
-  --ab-ink: #fff4dd;
-  --ab-muted: rgba(255, 236, 203, 0.82);
-  --ab-line: rgba(255, 214, 150, 0.62);
-  --ab-paper: #f7efe4;
-  --ab-paper-ink: #21170f;
-  --ab-paper-muted: #6d5b49;
+  --ab-cream: #fff324;
+  --ab-orange: #0024ec;
+  --ab-orange-deep: #001ec3;
+  --ab-ink: #ffffff;
+  --ab-muted: rgba(242, 237, 230, 0.82);
+  --ab-line: rgba(255, 243, 36, 0.52);
+  --ab-paper: #f2ede6;
+  --ab-paper-ink: #1f2440;
+  --ab-paper-muted: #4b4f63;
 }
 
 * { box-sizing: border-box; }
@@ -73,9 +73,9 @@ a { color: inherit; }
 
 .home {
   background:
-    radial-gradient(circle at 24% -10%, rgba(255, 182, 111, 0.35), transparent 44%),
-    radial-gradient(circle at 82% 9%, rgba(255, 171, 98, 0.24), transparent 42%),
-    linear-gradient(180deg, var(--ab-orange), var(--ab-orange-deep));
+    radial-gradient(circle at 18% 2%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at 84% 12%, rgba(255, 243, 36, 0.2), rgba(255, 243, 36, 0) 40%),
+    linear-gradient(180deg, #f7fbff 0%, #c8d6ff 26%, #4d68f5 58%, var(--ab-orange) 100%);
   color: var(--ab-ink);
 }
 
@@ -83,7 +83,7 @@ a { color: inherit; }
 .home .ab-footer { background: transparent; border-color: transparent; }
 
 .home .ab-brand,
-.home .ab-nav-list a { color: var(--ab-cream); }
+.home .ab-nav-list a { color: #0024ec; }
 
 .home .ab-main { position: relative; overflow: hidden; }
 .home .ab-main::before {
@@ -91,8 +91,8 @@ a { color: inherit; }
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(rgba(255, 232, 194, 0.16) 0.7px, transparent 0.7px),
-    radial-gradient(rgba(43, 18, 8, 0.18) 0.55px, transparent 0.55px);
+    radial-gradient(rgba(255, 255, 255, 0.2) 0.7px, transparent 0.7px),
+    radial-gradient(rgba(0, 0, 0, 0.22) 0.55px, transparent 0.55px);
   background-size: 6px 6px, 12px 12px;
   background-position: 0 0, 2px 2px;
   mix-blend-mode: soft-light;
@@ -115,7 +115,7 @@ a { color: inherit; }
   text-transform: uppercase;
   letter-spacing: 0.21em;
   font-size: 0.7rem;
-  color: var(--ab-cream);
+  color: #1a2f9f;
 }
 .ab-home-hero-copy h1 {
   text-transform: uppercase;
@@ -123,6 +123,7 @@ a { color: inherit; }
   line-height: 0.92;
   margin-bottom: 1rem;
   max-width: 14ch;
+  color: #0d238f;
 }
 
 .ab-home-lead {
@@ -131,7 +132,7 @@ a { color: inherit; }
   font-family: 'EB Garamond', Georgia, serif;
   font-size: clamp(1.26rem, 2vw, 1.8rem);
   line-height: 1.16;
-  color: #ffe8c3;
+  color: #18309e;
 }
 
 .ab-home-author {
@@ -139,7 +140,7 @@ a { color: inherit; }
   font-size: 0.95rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(255, 229, 191, 0.86);
+  color: #3149b4;
 }
 
 .ab-buy-grid {
@@ -160,21 +161,26 @@ a { color: inherit; }
   text-transform: uppercase;
   font-size: 0.63rem;
   letter-spacing: 0.22em;
-  color: #ffe8c3;
+  color: #1a2f9f;
 }
 
 .ab-home-actions { margin-top: 1.7rem; display: flex; gap: 0.74rem; flex-wrap: wrap; }
 .ab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
+  min-height: 2.9rem;
   padding: 0.7rem 1.2rem;
   border-radius: 999px;
   font-size: 0.77rem;
   letter-spacing: 0.16em;
+  line-height: 1;
   text-transform: uppercase;
   font-weight: 600;
 }
-.ab-btn-solid { background: #1f1812; color: #fff0d2; }
-.ab-btn-outline { border: 1px solid var(--ab-line); color: #ffe9c8; }
+.ab-btn-solid { background: var(--ab-cream); color: #0024ec; }
+.ab-btn-outline { border: 1px solid #3854c2; color: #1730a1; }
 
 .ab-home-hero-cover-wrap { display: flex; justify-content: center; }
 .ab-home-hero-cover {
@@ -193,7 +199,7 @@ a { color: inherit; }
   display: block;
   width: 100%;
   height: 100%;
-  background: repeating-linear-gradient(-45deg, rgba(255, 218, 166, 0.5), rgba(255, 218, 166, 0.5) 14px, rgba(255, 147, 97, 0.55) 14px, rgba(255, 147, 97, 0.55) 28px);
+  background: repeating-linear-gradient(-45deg, rgba(255, 243, 36, 0.58), rgba(255, 243, 36, 0.58) 14px, rgba(129, 132, 146, 0.55) 14px, rgba(129, 132, 146, 0.55) 28px);
 }
 
 .ab-home-intro { padding: 2.4rem 0 2.2rem; }
@@ -243,7 +249,7 @@ a { color: inherit; }
   text-transform: uppercase;
   font-size: 0.68rem;
   letter-spacing: 0.18em;
-  color: #ffe3bd;
+  color: var(--ab-cream);
 }
 
 .ab-home-books-grid {
@@ -302,7 +308,7 @@ a { color: inherit; }
   border-top: 1px solid var(--ab-line);
   padding-top: 1.1rem;
 }
-.home .ab-footer-inner a { color: #ffe7c2; }
+.home .ab-footer-inner a { color: var(--ab-cream); }
 
 .ab-generic-page { padding: clamp(2.5rem, 4vw, 3.5rem) 0; }
 .ab-generic-page h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); margin-bottom: 0.9rem; }
