@@ -1,4 +1,4 @@
-# Artbooks Publishing Website (WordPress)
+## Artbooks Publishing Website (WordPress)
 
 A WordPress-powered website for **Artbooks** publishing house: a scalable **book catalog** with dedicated **book pages**, **authors**, and **events**, designed so a non-technical admin can manage content via WP admin.
 
