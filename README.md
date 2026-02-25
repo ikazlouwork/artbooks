@@ -24,7 +24,7 @@ Everything else (single book pages, authors, events, contacts, advanced filterin
 ### 1) Home (`/`)
 - Hero section with brand positioning and primary CTA
 - Short publisher introduction
-- Featured or latest books preview (cards linking to catalog or book pages)
+- Featured or latest book``s preview (cards linking to catalog or book pages)
 - Navigation links to About and Books
 
 ### 2) About (`/about/`)
