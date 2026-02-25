@@ -19,8 +19,18 @@ add_action('after_setup_theme', 'artbooks_theme_setup');
 
 function artbooks_enqueue_assets(): void
 {
+    $main_css_path = get_template_directory() . '/assets/css/main.css';
+    $main_css_version = file_exists($main_css_path) ? (string) filemtime($main_css_path) : '0.2.0';
+
     wp_enqueue_style('artbooks-fonts', 'https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Jost:wght@400;500;600;700&display=swap', [], null);
-    wp_enqueue_style('artbooks-main', get_template_directory_uri() . '/assets/css/main.css', ['artbooks-fonts'], '0.2.0');
+    wp_enqueue_style('artbooks-main', get_template_directory_uri() . '/assets/css/main.css', ['artbooks-fonts'], $main_css_version);
+
+    if (is_front_page()) {
+        $hero_js_path = get_template_directory() . '/assets/js/home-hero-rotator.js';
+        $hero_js_version = file_exists($hero_js_path) ? (string) filemtime($hero_js_path) : '0.1.0';
+
+        wp_enqueue_script('artbooks-home-hero-rotator', get_template_directory_uri() . '/assets/js/home-hero-rotator.js', [], $hero_js_version, true);
+    }
 }
 add_action('wp_enqueue_scripts', 'artbooks_enqueue_assets');
 
