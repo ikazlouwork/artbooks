@@ -131,6 +131,60 @@ Typical fields (ACF):
     - Books → Add New (attach author + background + gallery + buy links)
     - Events → Add New
 
+## Development Plan
+
+- [ ] MVP delivery order
+  - [ ] Home page (/)
+  - [ ] About page (/about/)
+  - [ ] Books catalog (/books/)
+- [ ] Phase 1 - Theme foundation
+  - [ ] Create and activate custom theme wp-content/themes/artbooks/
+  - [ ] Set up base templates (front-page.php, page.php, archive.php, functions.php)
+  - [ ] Add global styles, layout grid, header/footer, and navigation
+  - [ ] Configure theme supports (title tag, thumbnails, responsive embeds)
+- [ ] Phase 2 - Content architecture
+  - [ ] Register CPTs: book, author, event
+  - [ ] Set clean URL structure and permalinks
+  - [ ] Prepare Book -> Author relationship
+- [ ] Phase 3 - ACF field modeling
+  - [ ] Create Book fields: cover, desktop/mobile background, overlay, accent color, author relation, description, illustrations, buy links
+  - [ ] Create Author fields: photo, bio, links
+  - [ ] Create Event fields: date/time, location, registration URL, content, optional gallery
+  - [ ] Validate editor workflow for non-technical admins
+- [ ] Phase 4 - Home page (/)
+  - [ ] Build hero section with primary CTA
+  - [ ] Add short publisher introduction
+  - [ ] Add featured/latest books preview
+  - [ ] Keep editorial, image-led visual style
+- [ ] Phase 5 - About page (/about/)
+  - [ ] Implement mission/story content block
+  - [ ] Add optional team/imprint block
+  - [ ] Add optional partner/contact links
+  - [ ] Keep content editable via WP Admin + ACF
+- [ ] Phase 6 - Books catalog (/books/)
+  - [ ] Build archive-book.php with responsive grid/list
+  - [ ] Show lightweight cards (cover, title, author, optional year)
+  - [ ] Add pagination
+  - [ ] Add basic search (s) and simple filters (author/year)
+  - [ ] Add empty state when no books are found
+- [ ] Phase 7 - Performance, SEO, accessibility
+  - [ ] Use thumbnail-size covers in catalog
+  - [ ] Enable lazy-loading for catalog media
+  - [ ] Do not load heavy per-book backgrounds on listing
+  - [ ] Ensure semantic headings, alt text, and keyboard focus states
+  - [ ] Keep archive pages indexable and pagination SEO-safe
+- [ ] Phase 8 - QA and content handover
+  - [ ] Test desktop/mobile layouts
+  - [ ] Verify search/filter/pagination combinations
+  - [ ] Validate links to single book pages
+  - [ ] Prepare sample content set for QA
+  - [ ] Document required fields and fallback behavior for editors
+- [ ] Follow-up (post-MVP)
+  - [ ] Single book sections (#about, #author, #illustrations, #buy)
+  - [ ] Authors list and author pages
+  - [ ] Events list and event pages
+  - [ ] Contacts page
+  - [ ] Advanced filters (FacetWP/SearchWP), multilingual support, editorial workflow improvements
 ## Deployment Notes
 
 - Use managed WP hosting (recommended) + CDN for media
@@ -194,3 +248,4 @@ Typical fields (ACF):
 ## License
 
 TBD (add your license here).
+
