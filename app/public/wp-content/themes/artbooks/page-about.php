@@ -10,8 +10,7 @@ get_header();
         <article class="ab-about-article">
             <h1>About Us</h1>
 
-            <p class="ab-about-lead">ARTBOOKS: books for curious children and adults</p>
-
+            <p>ARTBOOKS: books for curious children and adults</p>
             <p>We are an independent publishing team that believes in the power of stories. Since 2015, ARTBOOKS has been creating books that inspire, entertain, and stay with readers for years.</p>
 
             <p>Over the years, we have published hundreds of titles and built a community of readers, creators, and partners who care about quality books and strong visual storytelling. Today, ARTBOOKS is growing into the UK market, where we continue to develop an international catalog for modern readers.</p>
