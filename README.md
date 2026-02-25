@@ -134,7 +134,7 @@ Typical fields (ACF):
 ## Development Plan
 
 - [ ] MVP delivery order
-  - [ ] Home page (/)
+  - [x] Home page (/)
   - [ ] About page (/about/)
   - [ ] Books catalog (/books/)
 - [ ] Phase 1 - Theme foundation
@@ -151,11 +151,11 @@ Typical fields (ACF):
   - [ ] Create Author fields: photo, bio, links
   - [ ] Create Event fields: date/time, location, registration URL, content, optional gallery
   - [ ] Validate editor workflow for non-technical admins
-- [ ] Phase 4 - Home page (/)
-  - [ ] Build hero section with primary CTA
-  - [ ] Add short publisher introduction
-  - [ ] Add featured/latest books preview
-  - [ ] Keep editorial, image-led visual style
+- [x] Phase 4 - Home page (/)
+  - [x] Build hero section with primary CTA
+  - [x] Add short publisher introduction
+  - [x] Add featured/latest books preview
+  - [x] Keep editorial, image-led visual style
 - [ ] Phase 5 - About page (/about/)
   - [ ] Implement mission/story content block
   - [ ] Add optional team/imprint block
@@ -203,7 +203,7 @@ Typical fields (ACF):
 
 ## Roadmap (optional)
 
-- [ ] Home page (`/`) implementation
+- [x] Home page (`/`) implementation
 - [ ] About page (`/about/`) implementation
 - [ ] Books catalog (`/books/`) implementation
     - [ ] **Phase 1: Data + URL structure**
