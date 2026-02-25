@@ -88,3 +88,23 @@ wp-content/themes/*/node_modules/
 wp-content/themes/*/vendor/
 wp-content/plugins/*/node_modules/
 wp-content/plugins/*/vendor/
+
+# LocalWP generated stack
+/conf/
+/logs/
+/app/*
+!/app/public/
+/app/public/*
+!/app/public/wp-content/
+/app/public/wp-content/*
+!/app/public/wp-content/themes/
+/app/public/wp-content/themes/*
+!/app/public/wp-content/themes/artbooks/
+!/app/public/wp-content/themes/artbooks/**
+!/app/public/wp-content/plugins/
+/app/public/wp-content/plugins/*
+!/app/public/wp-content/plugins/artbooks*/
+!/app/public/wp-content/plugins/artbooks*/**
+!/app/public/wp-content/mu-plugins/
+/app/public/wp-content/mu-plugins/*
+!/app/public/wp-content/mu-plugins/**
