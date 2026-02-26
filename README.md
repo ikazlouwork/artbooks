@@ -136,7 +136,7 @@ Typical fields (ACF):
 - [ ] MVP delivery order
   - [x] Home page (/)
   - [x] About page (/about/)
-  - [ ] Books catalog (/books/)
+  - [x] Books catalog (/books/)
 - [ ] Phase 1 - Theme foundation
   - [x] Create and activate custom theme wp-content/themes/artbooks/
   - [ ] Set up base templates (front-page.php, page.php, archive.php, functions.php)
@@ -161,12 +161,12 @@ Typical fields (ACF):
   - [ ] Add optional team/imprint block
   - [ ] Add optional partner/contact links
   - [ ] Keep content editable via WP Admin + ACF
-- [ ] Phase 6 - Books catalog (/books/)
-  - [ ] Build archive-book.php with responsive grid/list
-  - [ ] Show lightweight cards (cover, title, author, optional year)
-  - [ ] Add pagination
-  - [ ] Add basic search (s) and simple filters (author/year)
-  - [ ] Add empty state when no books are found
+- [x] Phase 6 - Books catalog (/books/)
+  - [x] Build archive-book.php with responsive grid/list
+  - [x] Show lightweight cards (cover, title, author, optional year)
+  - [x] Add pagination
+  - [x] Add basic search (s) and simple filters (author/year)
+  - [x] Add empty state when no books are found
 - [ ] Phase 7 - Performance, SEO, accessibility
   - [ ] Use thumbnail-size covers in catalog
   - [ ] Enable lazy-loading for catalog media
