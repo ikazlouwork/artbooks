@@ -85,6 +85,8 @@ while (have_posts()) : the_post();
 
     $author_name = artbooks_get_book_author_name($book_id);
     $author_url = '';
+    $illustrator_name = '';
+    $illustrator_url = '';
 
     if (function_exists('get_field')) {
         $author_field = get_field('author', $book_id);
@@ -102,6 +104,40 @@ while (have_posts()) : the_post();
             $candidate_url = get_permalink($author_id);
             if (is_string($candidate_url)) {
                 $author_url = $candidate_url;
+            }
+        }
+
+        $illustrator_field = get_field('illustrator', $book_id);
+        $illustrator_id = 0;
+
+        if (is_numeric($illustrator_field)) {
+            $illustrator_id = (int) $illustrator_field;
+        } elseif (is_array($illustrator_field) && isset($illustrator_field['ID']) && is_numeric($illustrator_field['ID'])) {
+            $illustrator_id = (int) $illustrator_field['ID'];
+        } elseif (is_object($illustrator_field) && isset($illustrator_field->ID) && is_numeric($illustrator_field->ID)) {
+            $illustrator_id = (int) $illustrator_field->ID;
+        } elseif (is_string($illustrator_field) && trim($illustrator_field) !== '') {
+            $illustrator_name = trim($illustrator_field);
+        }
+
+        if ($illustrator_id > 0) {
+            $illustrator_title = get_the_title($illustrator_id);
+            if (is_string($illustrator_title) && $illustrator_title !== '') {
+                $illustrator_name = $illustrator_title;
+            }
+
+            if (get_post_status($illustrator_id) === 'publish') {
+                $candidate_url = get_permalink($illustrator_id);
+                if (is_string($candidate_url)) {
+                    $illustrator_url = $candidate_url;
+                }
+            }
+        }
+
+        if ($illustrator_name === '') {
+            $illustrator_meta = get_post_meta($book_id, 'illustrator', true);
+            if (is_string($illustrator_meta) && trim($illustrator_meta) !== '') {
+                $illustrator_name = trim($illustrator_meta);
             }
         }
     }
@@ -196,55 +232,54 @@ while (have_posts()) : the_post();
                     <div class="ab-book-anchor-nav">
                         <a href="#about"><?php esc_html_e('About', 'artbooks'); ?></a>
                         <a href="#author"><?php esc_html_e('Author', 'artbooks'); ?></a>
-                        <a href="#illustrations"><?php esc_html_e('Illustrations', 'artbooks'); ?></a>
+                        <?php if ($illustrator_name !== '') : ?>
+                            <a href="#illustrator"><?php esc_html_e('Illustrator', 'artbooks'); ?></a>
+                        <?php endif; ?>
                         <a href="#buy"><?php esc_html_e('Where to buy', 'artbooks'); ?></a>
                     </div>
+
+                    <section id="about" class="ab-book-section">
+                        <h2><?php esc_html_e('About', 'artbooks'); ?></h2>
+                        <div class="ab-book-richtext"><?php echo wp_kses_post(wpautop($book_description)); ?></div>
+                    </section>
+
+                    <section id="author" class="ab-book-section">
+                        <h2><?php esc_html_e('Author', 'artbooks'); ?></h2>
+                        <?php if ($author_url !== '') : ?>
+                            <p><a class="ab-book-author-link" href="<?php echo esc_url($author_url); ?>"><?php echo esc_html($author_name); ?></a></p>
+                        <?php else : ?>
+                            <p><?php echo esc_html($author_name); ?></p>
+                        <?php endif; ?>
+                    </section>
+
+                    <?php if ($illustrator_name !== '') : ?>
+                        <section id="illustrator" class="ab-book-section">
+                            <h2><?php esc_html_e('Illustrator', 'artbooks'); ?></h2>
+                            <?php if ($illustrator_url !== '') : ?>
+                                <p><a class="ab-book-author-link" href="<?php echo esc_url($illustrator_url); ?>"><?php echo esc_html($illustrator_name); ?></a></p>
+                            <?php else : ?>
+                                <p><?php echo esc_html($illustrator_name); ?></p>
+                            <?php endif; ?>
+                        </section>
+                    <?php endif; ?>
+
+                    <section id="buy" class="ab-book-section">
+                        <h2><?php esc_html_e('Where to buy', 'artbooks'); ?></h2>
+                        <?php if ($buy_links !== []) : ?>
+                            <ul class="ab-book-buy-links">
+                                <?php foreach ($buy_links as $link) : ?>
+                                    <li>
+                                        <a href="<?php echo esc_url($link['url']); ?>" target="_blank" rel="noopener noreferrer nofollow"><?php echo esc_html($link['label']); ?></a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else : ?>
+                            <p><?php esc_html_e('Store links will appear here after publication setup.', 'artbooks'); ?></p>
+                        <?php endif; ?>
+                    </section>
                 </div>
             </header>
 
-            <section id="about" class="ab-book-section">
-                <h2><?php esc_html_e('About', 'artbooks'); ?></h2>
-                <div class="ab-book-richtext"><?php echo wp_kses_post(wpautop($book_description)); ?></div>
-            </section>
-
-            <section id="author" class="ab-book-section">
-                <h2><?php esc_html_e('Author', 'artbooks'); ?></h2>
-                <?php if ($author_url !== '') : ?>
-                    <p><a class="ab-book-author-link" href="<?php echo esc_url($author_url); ?>"><?php echo esc_html($author_name); ?></a></p>
-                <?php else : ?>
-                    <p><?php echo esc_html($author_name); ?></p>
-                <?php endif; ?>
-            </section>
-
-            <section id="illustrations" class="ab-book-section">
-                <h2><?php esc_html_e('Illustrations', 'artbooks'); ?></h2>
-                <?php if ($gallery_items !== []) : ?>
-                    <div class="ab-book-gallery">
-                        <?php foreach ($gallery_items as $image) : ?>
-                            <figure>
-                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" loading="lazy" decoding="async">
-                            </figure>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else : ?>
-                    <p><?php esc_html_e('Illustrations will be added soon.', 'artbooks'); ?></p>
-                <?php endif; ?>
-            </section>
-
-            <section id="buy" class="ab-book-section">
-                <h2><?php esc_html_e('Where to buy', 'artbooks'); ?></h2>
-                <?php if ($buy_links !== []) : ?>
-                    <ul class="ab-book-buy-links">
-                        <?php foreach ($buy_links as $link) : ?>
-                            <li>
-                                <a href="<?php echo esc_url($link['url']); ?>" target="_blank" rel="noopener noreferrer nofollow"><?php echo esc_html($link['label']); ?></a>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else : ?>
-                    <p><?php esc_html_e('Store links will appear here after publication setup.', 'artbooks'); ?></p>
-                <?php endif; ?>
-            </section>
         </div>
     </article>
 <?php endwhile; ?>
