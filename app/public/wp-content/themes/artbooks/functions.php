@@ -34,6 +34,147 @@ function artbooks_enqueue_assets(): void
 }
 add_action('wp_enqueue_scripts', 'artbooks_enqueue_assets');
 
+function artbooks_register_content_post_types(): void
+{
+    if (post_type_exists('book')) {
+        return;
+    }
+
+    $book_labels = [
+        'name'               => __('Books', 'artbooks'),
+        'singular_name'      => __('Book', 'artbooks'),
+        'menu_name'          => __('Books', 'artbooks'),
+        'name_admin_bar'     => __('Book', 'artbooks'),
+        'add_new'            => __('Add New', 'artbooks'),
+        'add_new_item'       => __('Add New Book', 'artbooks'),
+        'new_item'           => __('New Book', 'artbooks'),
+        'edit_item'          => __('Edit Book', 'artbooks'),
+        'view_item'          => __('View Book', 'artbooks'),
+        'all_items'          => __('All Books', 'artbooks'),
+        'search_items'       => __('Search Books', 'artbooks'),
+        'not_found'          => __('No books found.', 'artbooks'),
+        'not_found_in_trash' => __('No books found in Trash.', 'artbooks'),
+    ];
+
+    register_post_type('book', [
+        'labels'              => $book_labels,
+        'public'              => true,
+        'has_archive'         => 'books',
+        'rewrite'             => ['slug' => 'books'],
+        'show_in_rest'        => true,
+        'menu_position'       => 21,
+        'menu_icon'           => 'dashicons-book-alt',
+        'supports'            => ['title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'],
+        'exclude_from_search' => false,
+    ]);
+}
+add_action('init', 'artbooks_register_content_post_types', 5);
+
+function artbooks_flush_rewrite_rules_after_switch(): void
+{
+    artbooks_register_content_post_types();
+    flush_rewrite_rules(false);
+}
+add_action('after_switch_theme', 'artbooks_flush_rewrite_rules_after_switch');
+
+function artbooks_books_archive_query(WP_Query $query): void
+{
+    if (is_admin() || ! $query->is_main_query() || ! $query->is_post_type_archive('book')) {
+        return;
+    }
+
+    $query->set('posts_per_page', 12);
+    $query->set('orderby', 'date');
+    $query->set('order', 'DESC');
+
+    $request_year = isset($_GET['year']) ? absint(wp_unslash($_GET['year'])) : 0;
+    if ($request_year >= 1000 && $request_year <= 9999) {
+        $query->set('year', $request_year);
+    }
+
+    $request_author = isset($_GET['author']) ? absint(wp_unslash($_GET['author'])) : 0;
+    if ($request_author > 0) {
+        $existing_meta_query = $query->get('meta_query');
+        $meta_query = is_array($existing_meta_query) ? $existing_meta_query : [];
+
+        $meta_query[] = [
+            'relation' => 'OR',
+            [
+                'key'     => 'author',
+                'value'   => (string) $request_author,
+                'compare' => '=',
+            ],
+            [
+                'key'     => 'author',
+                'value'   => '"' . (string) $request_author . '"',
+                'compare' => 'LIKE',
+            ],
+        ];
+
+        $query->set('meta_query', $meta_query);
+    }
+}
+add_action('pre_get_posts', 'artbooks_books_archive_query');
+
+function artbooks_get_books_archive_years(): array
+{
+    global $wpdb;
+
+    if (! ($wpdb instanceof wpdb)) {
+        return [];
+    }
+
+    $years = $wpdb->get_col(
+        "SELECT DISTINCT YEAR(post_date) FROM {$wpdb->posts} WHERE post_type = 'book' AND post_status = 'publish' ORDER BY post_date DESC"
+    );
+
+    if (! is_array($years)) {
+        return [];
+    }
+
+    $normalized = array_values(array_filter(array_map('absint', $years)));
+
+    return array_values(array_unique($normalized));
+}
+
+function artbooks_get_books_archive_authors(): array
+{
+    if (! post_type_exists('author')) {
+        return [];
+    }
+
+    $authors = get_posts([
+        'post_type'           => 'author',
+        'posts_per_page'      => -1,
+        'orderby'             => 'title',
+        'order'               => 'ASC',
+        'post_status'         => 'publish',
+        'suppress_filters'    => false,
+        'ignore_sticky_posts' => true,
+    ]);
+
+    if (! is_array($authors) || $authors === []) {
+        return [];
+    }
+
+    $options = [];
+
+    foreach ($authors as $author) {
+        if (! $author instanceof WP_Post) {
+            continue;
+        }
+
+        $author_id = (int) $author->ID;
+        $author_title = get_the_title($author_id);
+
+        if ($author_id > 0 && is_string($author_title) && $author_title !== '') {
+            $options[$author_id] = $author_title;
+        }
+    }
+
+    return $options;
+}
+
 function artbooks_register_about_route(): void
 {
     add_rewrite_rule('^about/?$', 'index.php?artbooks_about=1', 'top');
