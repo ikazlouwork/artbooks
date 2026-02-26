@@ -34,6 +34,66 @@ function artbooks_enqueue_assets(): void
 }
 add_action('wp_enqueue_scripts', 'artbooks_enqueue_assets');
 
+function artbooks_register_about_route(): void
+{
+    add_rewrite_rule('^about/?$', 'index.php?artbooks_about=1', 'top');
+
+    if (! get_option('artbooks_about_route_ready')) {
+        flush_rewrite_rules(false);
+        update_option('artbooks_about_route_ready', '1');
+    }
+}
+add_action('init', 'artbooks_register_about_route');
+
+function artbooks_register_query_vars(array $vars): array
+{
+    $vars[] = 'artbooks_about';
+
+    return $vars;
+}
+add_filter('query_vars', 'artbooks_register_query_vars');
+
+function artbooks_about_template_include(string $template): string
+{
+    if ((int) get_query_var('artbooks_about') !== 1) {
+        return $template;
+    }
+
+    $about_template = get_template_directory() . '/page-about.php';
+
+    if (! file_exists($about_template)) {
+        return $template;
+    }
+
+    status_header(200);
+
+    global $wp_query;
+    if ($wp_query instanceof WP_Query) {
+        $wp_query->is_404 = false;
+        $wp_query->is_page = true;
+    }
+
+    return $about_template;
+}
+add_filter('template_include', 'artbooks_about_template_include');
+
+function artbooks_about_body_class(array $classes): array
+{
+    if ((int) get_query_var('artbooks_about') !== 1) {
+        return $classes;
+    }
+
+    $filtered = array_filter(
+        $classes,
+        static fn (string $class): bool => ! in_array($class, ['home', 'blog'], true)
+    );
+
+    $filtered[] = 'ab-about-route';
+
+    return array_values(array_unique($filtered));
+}
+add_filter('body_class', 'artbooks_about_body_class');
+
 function artbooks_primary_cta_url(): string
 {
     if (post_type_exists('book')) {

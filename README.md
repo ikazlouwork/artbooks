@@ -24,7 +24,7 @@ Everything else (single book pages, authors, events, contacts, advanced filterin
 ### 1) Home (`/`)
 - Hero section with brand positioning and primary CTA
 - Short publisher introduction
-- Featured or latest books preview (cards linking to catalog or book pages)
+- Featured or latest book``s preview (cards linking to catalog or book pages)
 - Navigation links to About and Books
 
 ### 2) About (`/about/`)
@@ -135,13 +135,13 @@ Typical fields (ACF):
 
 - [ ] MVP delivery order
   - [x] Home page (/)
-  - [ ] About page (/about/)
+  - [x] About page (/about/)
   - [ ] Books catalog (/books/)
 - [ ] Phase 1 - Theme foundation
-  - [ ] Create and activate custom theme wp-content/themes/artbooks/
+  - [x] Create and activate custom theme wp-content/themes/artbooks/
   - [ ] Set up base templates (front-page.php, page.php, archive.php, functions.php)
-  - [ ] Add global styles, layout grid, header/footer, and navigation
-  - [ ] Configure theme supports (title tag, thumbnails, responsive embeds)
+  - [x] Add global styles, layout grid, header/footer, and navigation
+  - [x] Configure theme supports (title tag, thumbnails, responsive embeds)
 - [ ] Phase 2 - Content architecture
   - [ ] Register CPTs: book, author, event
   - [ ] Set clean URL structure and permalinks
@@ -157,7 +157,7 @@ Typical fields (ACF):
   - [x] Add featured/latest books preview
   - [x] Keep editorial, image-led visual style
 - [ ] Phase 5 - About page (/about/)
-  - [ ] Implement mission/story content block
+  - [x] Implement mission/story content block
   - [ ] Add optional team/imprint block
   - [ ] Add optional partner/contact links
   - [ ] Keep content editable via WP Admin + ACF
@@ -204,7 +204,7 @@ Typical fields (ACF):
 ## Roadmap (optional)
 
 - [x] Home page (`/`) implementation
-- [ ] About page (`/about/`) implementation
+- [x] About page (`/about/`) implementation
 - [ ] Books catalog (`/books/`) implementation
     - [ ] **Phase 1: Data + URL structure**
         - [ ] Register/verify `book` CPT archive slug as `/books/`
