@@ -180,7 +180,7 @@ Typical fields (ACF):
   - [ ] Prepare sample content set for QA
   - [ ] Document required fields and fallback behavior for editors
 - [ ] Follow-up (post-MVP)
-  - [ ] Single book sections (#about, #author, #illustrations, #buy)
+  - [x] Single book sections (#about, #author, #illustrations, #buy)
   - [ ] Authors list and author pages
   - [ ] Events list and event pages
   - [ ] Contacts page
