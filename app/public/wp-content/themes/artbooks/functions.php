@@ -182,20 +182,22 @@ function artbooks_get_books_archive_authors(): array
     return $options;
 }
 
-function artbooks_register_about_route(): void
+function artbooks_register_public_routes(): void
 {
     add_rewrite_rule('^about/?$', 'index.php?artbooks_about=1', 'top');
+    add_rewrite_rule('^privacy-policy/?$', 'index.php?artbooks_privacy=1', 'top');
 
-    if (! get_option('artbooks_about_route_ready')) {
+    if (! get_option('artbooks_public_routes_ready_v2')) {
         flush_rewrite_rules(false);
-        update_option('artbooks_about_route_ready', '1');
+        update_option('artbooks_public_routes_ready_v2', '1');
     }
 }
-add_action('init', 'artbooks_register_about_route');
+add_action('init', 'artbooks_register_public_routes');
 
 function artbooks_register_query_vars(array $vars): array
 {
     $vars[] = 'artbooks_about';
+    $vars[] = 'artbooks_privacy';
 
     return $vars;
 }
@@ -225,6 +227,30 @@ function artbooks_about_template_include(string $template): string
 }
 add_filter('template_include', 'artbooks_about_template_include');
 
+function artbooks_privacy_template_include(string $template): string
+{
+    if ((int) get_query_var('artbooks_privacy') !== 1) {
+        return $template;
+    }
+
+    $privacy_template = get_template_directory() . '/page-privacy-policy.php';
+
+    if (! file_exists($privacy_template)) {
+        return $template;
+    }
+
+    status_header(200);
+
+    global $wp_query;
+    if ($wp_query instanceof WP_Query) {
+        $wp_query->is_404 = false;
+        $wp_query->is_page = true;
+    }
+
+    return $privacy_template;
+}
+add_filter('template_include', 'artbooks_privacy_template_include');
+
 function artbooks_about_body_class(array $classes): array
 {
     if ((int) get_query_var('artbooks_about') !== 1) {
@@ -241,6 +267,18 @@ function artbooks_about_body_class(array $classes): array
     return array_values(array_unique($filtered));
 }
 add_filter('body_class', 'artbooks_about_body_class');
+
+function artbooks_privacy_page_body_class(array $classes): array
+{
+    if ((int) get_query_var('artbooks_privacy') !== 1 && ! is_page('privacy-policy')) {
+        return $classes;
+    }
+
+    $classes[] = 'ab-about-route';
+
+    return array_values(array_unique($classes));
+}
+add_filter('body_class', 'artbooks_privacy_page_body_class');
 
 function artbooks_primary_cta_url(): string
 {
