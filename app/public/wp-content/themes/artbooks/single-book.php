@@ -206,8 +206,15 @@ while (have_posts()) : the_post();
     }
     $book_background_style[] = '--ab-book-overlay-opacity: ' . esc_attr((string) $overlay_opacity);
     $book_background_style[] = '--ab-book-accent: ' . esc_attr($accent_color);
+    $book_page_classes = ['ab-book-page'];
+    if ($is_light_theme) {
+        $book_page_classes[] = 'is-light';
+    }
+    if ($desktop_background_url !== '' || $mobile_background_url !== '') {
+        $book_page_classes[] = 'has-book-bg';
+    }
     ?>
-    <article class="ab-book-page<?php echo $is_light_theme ? ' is-light' : ''; ?>" style="<?php echo esc_attr(implode('; ', $book_background_style)); ?>">
+    <article class="<?php echo esc_attr(implode(' ', $book_page_classes)); ?>" style="<?php echo esc_attr(implode('; ', $book_background_style)); ?>">
         <div class="ab-container ab-book-wrap">
             <nav class="ab-book-crumbs" aria-label="<?php esc_attr_e('Breadcrumb', 'artbooks'); ?>">
                 <a href="<?php echo esc_url(home_url('/books/')); ?>"><?php esc_html_e('Books', 'artbooks'); ?></a>
