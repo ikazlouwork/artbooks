@@ -292,38 +292,188 @@ function artbooks_get_book_author_name(int $post_id): string
 
 function artbooks_get_buy_links(int $post_id): array
 {
-    if (! function_exists('get_field')) {
-        return [];
-    }
-
     $possible_fields = ['where_to_buy', 'where_to_buy_links', 'buy_links'];
+    $max_links = 24;
+    $acf_available = function_exists('get_field');
+    $label_meta_keys = ['store_name', 'title', 'label', 'name', 'store', 'shop', 'retailer', 'buy_label', 'where_to_buy_label'];
+    $url_meta_keys = ['url', 'link', 'store_url', 'store_link', 'buy_url', 'buy_link', 'where_to_buy_url'];
+
+    $normalize_url = static function ($value): string {
+        if (is_string($value)) {
+            return trim($value);
+        }
+
+        if (is_array($value)) {
+            foreach (['url', 'link', 'value'] as $key) {
+                if (! empty($value[$key]) && is_string($value[$key])) {
+                    return trim($value[$key]);
+                }
+            }
+        }
+
+        return '';
+    };
 
     foreach ($possible_fields as $field_name) {
-        $rows = get_field($field_name, $post_id);
+        $normalized = [];
 
-        if (! is_array($rows) || $rows === []) {
+        if ($acf_available) {
+            $rows = get_field($field_name, $post_id);
+
+            if (is_array($rows) && $rows !== []) {
+                if (isset($rows['links']) && is_array($rows['links'])) {
+                    $rows = $rows['links'];
+                } elseif (isset($rows['items']) && is_array($rows['items'])) {
+                    $rows = $rows['items'];
+                } elseif (isset($rows['rows']) && is_array($rows['rows'])) {
+                    $rows = $rows['rows'];
+                } elseif (
+                    isset($rows['url'])
+                    || isset($rows['link'])
+                    || isset($rows['store_url'])
+                    || isset($rows['store_link'])
+                    || isset($rows['buy_url'])
+                    || isset($rows['buy_link'])
+                ) {
+                    $rows = [$rows];
+                }
+
+                foreach ($rows as $row) {
+                    if (! is_array($row)) {
+                        continue;
+                    }
+
+                    $label = '';
+                    foreach ($label_meta_keys as $label_key) {
+                        if (! empty($row[$label_key]) && is_string($row[$label_key])) {
+                            $label = trim($row[$label_key]);
+                            break;
+                        }
+                    }
+
+                    $url = '';
+                    foreach ($url_meta_keys as $url_key) {
+                        if (! isset($row[$url_key])) {
+                            continue;
+                        }
+
+                        $url = $normalize_url($row[$url_key]);
+                        if ($url !== '') {
+                            if ($label === '' && is_array($row[$url_key]) && ! empty($row[$url_key]['title']) && is_string($row[$url_key]['title'])) {
+                                $label = trim($row[$url_key]['title']);
+                            }
+                            break;
+                        }
+                    }
+
+                    if ($label !== '' && $url !== '') {
+                        $normalized[] = [
+                            'label' => $label,
+                            'url'   => $url,
+                        ];
+                    }
+
+                    if (count($normalized) === $max_links) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($normalized !== []) {
+            return $normalized;
+        }
+
+        $meta_row_count = absint(get_post_meta($post_id, $field_name, true));
+        if ($meta_row_count < 1) {
             continue;
         }
 
-        $normalized = [];
+        $meta_normalized = [];
 
-        foreach ($rows as $row) {
-            if (! is_array($row)) {
-                continue;
-            }
-
+        for ($i = 0; $i < $meta_row_count; $i++) {
             $label = '';
-            foreach (['store_name', 'title', 'label', 'name'] as $label_key) {
-                if (! empty($row[$label_key]) && is_string($row[$label_key])) {
-                    $label = trim($row[$label_key]);
+            foreach ($label_meta_keys as $label_key) {
+                $label_value = get_post_meta($post_id, $field_name . '_' . $i . '_' . $label_key, true);
+                if (is_string($label_value) && trim($label_value) !== '') {
+                    $label = trim($label_value);
                     break;
                 }
             }
 
             $url = '';
-            foreach (['url', 'link'] as $url_key) {
-                if (! empty($row[$url_key]) && is_string($row[$url_key])) {
-                    $url = trim($row[$url_key]);
+            foreach ($url_meta_keys as $url_key) {
+                $url_value = get_post_meta($post_id, $field_name . '_' . $i . '_' . $url_key, true);
+                $url = $normalize_url($url_value);
+
+                if ($url !== '') {
+                    if ($label === '' && is_array($url_value) && ! empty($url_value['title']) && is_string($url_value['title'])) {
+                        $label = trim($url_value['title']);
+                    }
+                    break;
+                }
+            }
+
+            if ($label !== '' && $url !== '') {
+                $meta_normalized[] = [
+                    'label' => $label,
+                    'url'   => $url,
+                ];
+            }
+
+            if (count($meta_normalized) === $max_links) {
+                break;
+            }
+        }
+
+        if ($meta_normalized !== []) {
+            return $meta_normalized;
+        }
+    }
+
+    $all_meta = get_post_meta($post_id);
+    if (! is_array($all_meta) || $all_meta === []) {
+        return [];
+    }
+
+    $detected_prefixes = [];
+
+    foreach (array_keys($all_meta) as $meta_key) {
+        if (! is_string($meta_key) || $meta_key === '' || $meta_key[0] === '_') {
+            continue;
+        }
+
+        if (preg_match('/^(.+)_\d+_(url|link|store_url|store_link|buy_url|buy_link)$/', $meta_key, $match) === 1 && isset($match[1])) {
+            $detected_prefixes[] = $match[1];
+        }
+    }
+
+    $detected_prefixes = array_values(array_unique($detected_prefixes));
+
+    foreach ($detected_prefixes as $prefix) {
+        $row_count = absint(get_post_meta($post_id, $prefix, true));
+        if ($row_count < 1) {
+            continue;
+        }
+
+        $normalized = [];
+
+        for ($i = 0; $i < $row_count; $i++) {
+            $label = '';
+            foreach ($label_meta_keys as $label_key) {
+                $label_value = get_post_meta($post_id, $prefix . '_' . $i . '_' . $label_key, true);
+                if (is_string($label_value) && trim($label_value) !== '') {
+                    $label = trim($label_value);
+                    break;
+                }
+            }
+
+            $url = '';
+            foreach ($url_meta_keys as $url_key) {
+                $url_value = get_post_meta($post_id, $prefix . '_' . $i . '_' . $url_key, true);
+                $url = $normalize_url($url_value);
+
+                if ($url !== '') {
                     break;
                 }
             }
@@ -335,7 +485,7 @@ function artbooks_get_buy_links(int $post_id): array
                 ];
             }
 
-            if (count($normalized) === 6) {
+            if (count($normalized) === $max_links) {
                 break;
             }
         }
@@ -343,6 +493,95 @@ function artbooks_get_buy_links(int $post_id): array
         if ($normalized !== []) {
             return $normalized;
         }
+    }
+
+    $indexed_candidates = [];
+
+    foreach (array_keys($all_meta) as $meta_key) {
+        if (! is_string($meta_key) || $meta_key === '' || $meta_key[0] === '_') {
+            continue;
+        }
+
+        if (preg_match('/^([a-z0-9_]+)_(\d+)$/i', $meta_key, $match) !== 1 || ! isset($match[1], $match[2])) {
+            continue;
+        }
+
+        $base_key = strtolower($match[1]);
+        $index = absint($match[2]);
+
+        if ($index < 1 || $index > $max_links) {
+            continue;
+        }
+
+        if (in_array($base_key, $label_meta_keys, true) || in_array($base_key, $url_meta_keys, true)) {
+            $indexed_candidates[$index] = true;
+        }
+    }
+
+    if ($indexed_candidates !== []) {
+        $indexed_links = [];
+        $indices = array_keys($indexed_candidates);
+        sort($indices, SORT_NUMERIC);
+
+        foreach ($indices as $index) {
+            $label = '';
+            foreach ($label_meta_keys as $label_key) {
+                $label_value = get_post_meta($post_id, $label_key . '_' . $index, true);
+                if (is_string($label_value) && trim($label_value) !== '') {
+                    $label = trim($label_value);
+                    break;
+                }
+            }
+
+            $url = '';
+            foreach ($url_meta_keys as $url_key) {
+                $url_value = get_post_meta($post_id, $url_key . '_' . $index, true);
+                $url = $normalize_url($url_value);
+                if ($url !== '') {
+                    break;
+                }
+            }
+
+            if ($label !== '' && $url !== '') {
+                $indexed_links[] = [
+                    'label' => $label,
+                    'url'   => $url,
+                ];
+            }
+
+            if (count($indexed_links) === $max_links) {
+                break;
+            }
+        }
+
+        if ($indexed_links !== []) {
+            return $indexed_links;
+        }
+    }
+
+    $single_label = '';
+    foreach ($label_meta_keys as $label_key) {
+        $label_value = get_post_meta($post_id, $label_key, true);
+        if (is_string($label_value) && trim($label_value) !== '') {
+            $single_label = trim($label_value);
+            break;
+        }
+    }
+
+    $single_url = '';
+    foreach ($url_meta_keys as $url_key) {
+        $url_value = get_post_meta($post_id, $url_key, true);
+        $single_url = $normalize_url($url_value);
+        if ($single_url !== '') {
+            break;
+        }
+    }
+
+    if ($single_label !== '' && $single_url !== '') {
+        return [[
+            'label' => $single_label,
+            'url'   => $single_url,
+        ]];
     }
 
     return [];
