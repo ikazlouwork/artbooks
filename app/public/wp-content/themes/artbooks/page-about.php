@@ -4,39 +4,37 @@ if (! defined('ABSPATH')) {
 }
 
 get_header();
+
+$about_page = get_page_by_path('about', OBJECT, 'page');
+$about_title = __('About Us', 'artbooks');
+$about_content = '';
+
+if ($about_page instanceof WP_Post) {
+    $about_title_candidate = get_the_title($about_page);
+    if (is_string($about_title_candidate) && $about_title_candidate !== '') {
+        $about_title = $about_title_candidate;
+    }
+
+    if ($about_page->post_status === 'publish') {
+        $about_content = apply_filters('the_content', (string) $about_page->post_content);
+    }
+}
 ?>
 <section class="ab-about-page">
     <div class="ab-container">
+        <nav class="ab-about-crumbs" aria-label="<?php esc_attr_e('Breadcrumb', 'artbooks'); ?>">
+            <a href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'artbooks'); ?></a>
+            <span aria-hidden="true">/</span>
+            <span><?php echo esc_html($about_title); ?></span>
+        </nav>
+
         <article class="ab-about-article">
-            <h1>About Us</h1>
-
-            <p>ARTBOOKS: books for curious children and adults</p>
-            <p>We are an independent publishing team that believes in the power of stories. Since 2015, ARTBOOKS has been creating books that inspire, entertain, and stay with readers for years.</p>
-
-            <p>Over the years, we have published hundreds of titles and built a community of readers, creators, and partners who care about quality books and strong visual storytelling. Today, ARTBOOKS is growing into the UK market, where we continue to develop an international catalog for modern readers.</p>
-
-            <h2>Our publishing focus</h2>
-
-            <ul>
-                <li>Children's publishing remains at the heart of what we do, including books connected with globally loved worlds such as Minecraft, LEGO, and Roblox.</li>
-                <li>Our list now includes adult nonfiction and fiction, with contemporary international voices and selected bestsellers.</li>
-                <li>We are expanding our manga and Japanese literature line with carefully selected titles for English-speaking readers.</li>
-                <li>Alongside licensed international titles, we continue to develop projects with original authors and illustrators.</li>
-            </ul>
-
-            <p>We see publishing as a long-term cultural project. Our goal is to connect local and international voices, bring distinctive books to new audiences, and build a catalog that readers can return to again and again.</p>
-
-            <h2>Our principles</h2>
-
-            <ul>
-                <li>editorial quality first: thoughtful curation, careful translation, and strong design;</li>
-                <li>responsible partnerships with authors, artists, translators, and rights holders;</li>
-                <li>support for reading culture through schools, libraries, and community initiatives.</li>
-            </ul>
-
-            <p>We believe books can open worlds, start conversations, and create lasting connections.</p>
-
-            <p><strong>ARTBOOKS is 10 years old. And we are only getting started!</strong></p>
+            <h1><?php echo esc_html($about_title); ?></h1>
+            <?php if ($about_content !== '') : ?>
+                <div class="ab-about-content"><?php echo wp_kses_post($about_content); ?></div>
+            <?php else : ?>
+                <p><?php esc_html_e('Create and publish a page with slug "about" to manage this content from admin.', 'artbooks'); ?></p>
+            <?php endif; ?>
         </article>
     </div>
 </section>
