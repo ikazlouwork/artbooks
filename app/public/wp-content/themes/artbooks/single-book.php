@@ -423,18 +423,21 @@ while (have_posts()) : the_post();
                 </div>
 
                 <div class="ab-book-headline">
-                    <p class="ab-book-kicker"><?php esc_html_e('Book Page', 'artbooks'); ?></p>
+                    <div class="ab-book-topline">
+                        <p class="ab-book-kicker"><?php esc_html_e('Book Page', 'artbooks'); ?></p>
+
+                        <div class="ab-book-anchor-nav">
+                            <a href="#about"><?php esc_html_e('About', 'artbooks'); ?></a>
+                            <a href="#author"><?php esc_html_e('Author', 'artbooks'); ?></a>
+                            <?php if ($illustrator_name !== '') : ?>
+                                <a href="#illustrator"><?php esc_html_e('Illustrator', 'artbooks'); ?></a>
+                            <?php endif; ?>
+                            <a href="#buy"><?php esc_html_e('Where to buy', 'artbooks'); ?></a>
+                        </div>
+                    </div>
+
                     <h1><?php the_title(); ?></h1>
                     <p class="ab-book-author"><?php echo esc_html($author_name); ?></p>
-
-                    <div class="ab-book-anchor-nav">
-                        <a href="#about"><?php esc_html_e('About', 'artbooks'); ?></a>
-                        <a href="#author"><?php esc_html_e('Author', 'artbooks'); ?></a>
-                        <?php if ($illustrator_name !== '') : ?>
-                            <a href="#illustrator"><?php esc_html_e('Illustrator', 'artbooks'); ?></a>
-                        <?php endif; ?>
-                        <a href="#buy"><?php esc_html_e('Where to buy', 'artbooks'); ?></a>
-                    </div>
 
                     <section id="about" class="ab-book-section">
                         <h2><?php esc_html_e('About', 'artbooks'); ?></h2>
@@ -474,6 +477,7 @@ while (have_posts()) : the_post();
                         <?php else : ?>
                             <p><?php esc_html_e('Store links will appear here after publication setup.', 'artbooks'); ?></p>
                         <?php endif; ?>
+
                     </section>
                 </div>
             </header>
