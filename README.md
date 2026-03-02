@@ -81,7 +81,16 @@ Typical fields (ACF):
 - Author reference (`author`)
 - Description (WYSIWYG)
 - Illustrations gallery
-- “Where to buy” links (repeater: store name + URL + optional note)
+- “Where to buy” links:
+  - ACF Pro: repeater (store name + URL + optional note)
+  - ACF Free fallback: indexed fields (`store_name_1` + `store_url_1`, `store_name_2` + `store_url_2`, etc.)
+
+## Recent Updates (Book Page)
+
+- Added robust `Where to buy` parsing in theme logic (`single`, `indexed`, and ACF repeater/meta variants)
+- Confirmed support for multiple stores on single book pages without requiring ACF Pro repeater
+- Improved `Where to buy` visual layout (cleaner card links, consistent section spacing)
+- Refined top navigation on book page: anchor links are now integrated with the kicker as compact text links (`#... / #...`)
 
 ### Author (`author`)
 - Photo
