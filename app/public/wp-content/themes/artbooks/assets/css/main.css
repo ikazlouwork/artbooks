@@ -792,7 +792,8 @@ a { color: inherit; }
   border-radius: 1.05rem;
   background: rgba(247, 251, 255, 0.1);
   box-shadow: 0 16px 40px rgba(3, 17, 90, 0.16);
-  backdrop-filter: blur(8px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .ab-book-hero::before {
@@ -897,12 +898,28 @@ a { color: inherit; }
   letter-spacing: 0.11em;
   font-size: 0.63rem;
   font-weight: 600;
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color 180ms ease, transform 180ms ease;
 }
 
 .ab-book-anchor-nav a:hover {
   background: rgba(255, 243, 36, 0.16);
   transform: translateY(-1px);
+}
+
+.ab-book-anchor-nav a:focus,
+.ab-book-anchor-nav a:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.ab-book-anchor-nav a:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-color: rgba(255, 243, 36, 0.95);
+  background: rgba(255, 243, 36, 0.2);
 }
 
 .ab-book-headline .ab-book-section {
