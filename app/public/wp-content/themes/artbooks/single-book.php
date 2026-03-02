@@ -344,49 +344,6 @@ while (have_posts()) : the_post();
 
     $buy_links = artbooks_get_buy_links($book_id);
 
-    $buy_debug_requested = isset($_GET['ab_debug_buy']) && $_GET['ab_debug_buy'] === '1';
-    $buy_debug_allowed_for_local = function_exists('wp_get_environment_type') && wp_get_environment_type() === 'local';
-    $buy_debug_enabled = $buy_debug_requested && ($buy_debug_allowed_for_local || (is_user_logged_in() && current_user_can('manage_options')));
-    $buy_debug_lines = [];
-
-    if ($buy_debug_enabled) {
-        $buy_debug_lines[] = 'post_id: ' . (string) $book_id;
-        $buy_debug_lines[] = 'buy_links_count: ' . (string) count($buy_links);
-
-        if (function_exists('get_field')) {
-            foreach (['where_to_buy', 'where_to_buy_links', 'buy_links'] as $candidate_field) {
-                $raw_field_value = get_field($candidate_field, $book_id);
-                $encoded = wp_json_encode($raw_field_value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                $buy_debug_lines[] = 'acf.' . $candidate_field . ': ' . (is_string($encoded) ? $encoded : '[unserializable]');
-            }
-        } else {
-            $buy_debug_lines[] = 'acf: get_field() unavailable';
-        }
-
-        $all_meta = get_post_meta($book_id);
-        if (is_array($all_meta) && $all_meta !== []) {
-            foreach ($all_meta as $meta_key => $meta_values) {
-                if (! is_string($meta_key)) {
-                    continue;
-                }
-
-                $lc_meta_key = strtolower($meta_key);
-                if (
-                    strpos($lc_meta_key, 'buy') === false
-                    && strpos($lc_meta_key, 'store') === false
-                    && strpos($lc_meta_key, 'shop') === false
-                    && strpos($lc_meta_key, 'where_to_buy') === false
-                    && strpos($lc_meta_key, 'link') === false
-                ) {
-                    continue;
-                }
-
-                $encoded = wp_json_encode($meta_values, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                $buy_debug_lines[] = 'meta.' . $meta_key . ': ' . (is_string($encoded) ? $encoded : '[unserializable]');
-            }
-        }
-    }
-
     $book_background_style = [];
     if ($desktop_background_url !== '') {
         $book_background_style[] = '--ab-book-bg-desktop: url(' . esc_url_raw($desktop_background_url) . ')';
@@ -518,12 +475,6 @@ while (have_posts()) : the_post();
                             <p><?php esc_html_e('Store links will appear here after publication setup.', 'artbooks'); ?></p>
                         <?php endif; ?>
 
-                        <?php if ($buy_debug_enabled) : ?>
-                            <details class="ab-book-buy-debug" open>
-                                <summary><?php esc_html_e('Buy links debug', 'artbooks'); ?></summary>
-                                <pre><?php echo esc_html(implode("\n", $buy_debug_lines)); ?></pre>
-                            </details>
-                        <?php endif; ?>
                     </section>
                 </div>
             </header>

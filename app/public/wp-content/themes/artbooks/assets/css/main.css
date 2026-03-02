@@ -925,14 +925,24 @@ a { color: inherit; }
   letter-spacing: 0.12em;
 }
 
+.ab-book-headline .ab-book-section > h2 + * {
+  margin-top: 1rem;
+}
+
 .ab-book-headline .ab-book-section p,
 .ab-book-headline .ab-book-richtext p {
   font-size: clamp(0.98rem, 1.05vw, 1.08rem);
 }
 
 .ab-book-headline .ab-book-buy-links {
-  margin-top: 0.5rem;
+  margin-top: 0;
   grid-template-columns: 1fr;
+  max-width: 26rem;
+  justify-items: start;
+}
+
+.ab-book-headline .ab-book-buy-links li {
+  width: 100%;
 }
 
 .ab-book-section {
@@ -1213,29 +1223,62 @@ a { color: inherit; }
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.65rem;
 }
 
 .ab-book-buy-links a {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  min-height: 2.35rem;
-  border-radius: 999px;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-height: 2.9rem;
+  border-radius: 0.72rem;
   border: 1px solid rgba(255, 243, 36, 0.62);
-  padding: 0.35rem 0.95rem;
+  padding: 0.55rem 0.9rem 0.55rem 1rem;
   color: #fff;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.65rem;
-  background: rgba(9, 24, 110, 0.3);
-  transition: background-color 180ms ease, border-color 180ms ease;
+  letter-spacing: 0.1em;
+  font-size: 0.67rem;
+  font-weight: 600;
+  background:
+    linear-gradient(135deg, rgba(255, 243, 36, 0.18), rgba(255, 243, 36, 0.02)),
+    rgba(9, 24, 110, 0.36);
+  box-shadow: 0 10px 20px rgba(0, 10, 54, 0.24);
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.ab-book-buy-links a::after {
+  content: '\2197';
+  font-size: 0.78rem;
+  line-height: 1;
+  opacity: 0.88;
 }
 
 .ab-book-buy-links a:hover {
   border-color: rgba(255, 243, 36, 0.85);
-  background: rgba(255, 243, 36, 0.14);
+  background:
+    linear-gradient(135deg, rgba(255, 243, 36, 0.34), rgba(255, 243, 36, 0.08)),
+    rgba(7, 21, 98, 0.46);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(0, 10, 54, 0.3);
+}
+
+.ab-book-page.is-light .ab-book-buy-links a {
+  color: #0f245f;
+  border-color: rgba(15, 36, 95, 0.24);
+  background:
+    linear-gradient(135deg, rgba(255, 243, 36, 0.26), rgba(255, 243, 36, 0.08)),
+    rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 18px rgba(8, 24, 72, 0.14);
+}
+
+.ab-book-page.is-light .ab-book-buy-links a:hover {
+  border-color: rgba(15, 36, 95, 0.38);
+  background:
+    linear-gradient(135deg, rgba(255, 243, 36, 0.42), rgba(255, 243, 36, 0.18)),
+    rgba(255, 255, 255, 0.8);
 }
 
 .post-type-archive-book .ab-footer-inner {
