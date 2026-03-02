@@ -58,6 +58,14 @@ while (have_posts()) : the_post();
     $desktop_background_url = $acf_value_to_url($desktop_background_raw);
     $mobile_background_url = $acf_value_to_url($mobile_background_raw);
 
+    $book_page_backgrounds = artbooks_get_book_page_backgrounds($book_id);
+    if (isset($book_page_backgrounds['desktop']) && is_string($book_page_backgrounds['desktop']) && trim($book_page_backgrounds['desktop']) !== '') {
+        $desktop_background_url = trim($book_page_backgrounds['desktop']);
+    }
+    if (isset($book_page_backgrounds['mobile']) && is_string($book_page_backgrounds['mobile']) && trim($book_page_backgrounds['mobile']) !== '') {
+        $mobile_background_url = trim($book_page_backgrounds['mobile']);
+    }
+
     $overlay_opacity_raw = $acf_pick_first($book_id, ['overlay_opacity', 'background_overlay_opacity']);
     $overlay_opacity = 0.36;
     if (is_numeric($overlay_opacity_raw)) {
@@ -357,8 +365,39 @@ while (have_posts()) : the_post();
     if ($is_light_theme) {
         $book_page_classes[] = 'is-light';
     }
-    if ($desktop_background_url !== '' || $mobile_background_url !== '') {
-        $book_page_classes[] = 'has-book-bg';
+    $has_custom_page_background = $desktop_background_url !== '' || $mobile_background_url !== '';
+
+    if ($has_custom_page_background) {
+        $global_bg_url = $desktop_background_url !== '' ? $desktop_background_url : $mobile_background_url;
+        $global_bg_mobile_url = $mobile_background_url !== '' ? $mobile_background_url : $global_bg_url;
+        ?>
+        <style>
+            .single-book {
+                background:
+                    linear-gradient(rgba(6, 20, 98, <?php echo esc_html((string) $overlay_opacity); ?>), rgba(6, 20, 98, <?php echo esc_html((string) $overlay_opacity); ?>)),
+                    url('<?php echo esc_url($global_bg_url); ?>');
+                background-position: center top;
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-color: var(--ab-orange);
+            }
+
+            .single-book .ab-main::before {
+                opacity: 0.3;
+            }
+
+            @media (max-width: 640px) {
+                .single-book {
+                    background:
+                        linear-gradient(rgba(6, 20, 98, <?php echo esc_html((string) $overlay_opacity); ?>), rgba(6, 20, 98, <?php echo esc_html((string) $overlay_opacity); ?>)),
+                        url('<?php echo esc_url($global_bg_mobile_url); ?>');
+                    background-position: center top;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                }
+            }
+        </style>
+        <?php
     }
     ?>
     <article class="<?php echo esc_attr(implode(' ', $book_page_classes)); ?>" style="<?php echo esc_attr(implode('; ', $book_background_style)); ?>">

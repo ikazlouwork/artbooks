@@ -790,7 +790,7 @@ a { color: inherit; }
   padding: clamp(1rem, 1.8vw, 1.35rem);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 1.05rem;
-  background: rgba(247, 251, 255, 0.1);
+  background: rgba(247, 251, 255, 0.30);
   box-shadow: 0 16px 40px rgba(3, 17, 90, 0.16);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
