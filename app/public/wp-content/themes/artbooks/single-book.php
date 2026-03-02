@@ -390,7 +390,7 @@ while (have_posts()) : the_post();
                                     <div class="ab-product-images-track" data-ab-book-slider-track>
                                         <?php foreach ($slider_images as $index => $image) : ?>
                                             <figure class="ab-product-image-slide<?php echo $index === 0 ? ' is-active' : ''; ?>" data-ab-book-slider-slide="<?php echo esc_attr((string) $index); ?>">
-                                                <a href="<?php echo esc_url($image['full_url']); ?>" target="_blank" rel="noopener noreferrer">
+                                                <a href="<?php echo esc_url($image['full_url']); ?>">
                                                     <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" loading="lazy">
                                                 </a>
                                             </figure>
