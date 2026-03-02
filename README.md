@@ -181,6 +181,10 @@ Typical fields (ACF):
   - [ ] Document required fields and fallback behavior for editors
 - [ ] Follow-up (post-MVP)
   - [x] Single book sections (#about, #author, #illustrations, #buy)
+  - [x] Single book product image slider under cover (thumbnails, arrows, keyboard navigation)
+  - [x] Slider image popup/lightbox (in-page modal instead of opening new tab)
+  - [x] Fallback: use images from book content when ACF Pro Gallery is unavailable
+  - [x] Avoid duplicate images in About section when they are used in slider
   - [ ] Authors list and author pages
   - [ ] Events list and event pages
   - [ ] Contacts page

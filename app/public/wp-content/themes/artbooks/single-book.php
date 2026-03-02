@@ -149,6 +149,7 @@ while (have_posts()) : the_post();
         foreach ($gallery_raw as $item) {
             $image_id = 0;
             $image_url = '';
+            $image_full_url = '';
             $image_alt = '';
 
             if (is_numeric($item)) {
@@ -172,6 +173,10 @@ while (have_posts()) : the_post();
                 if (is_string($candidate_url)) {
                     $image_url = $candidate_url;
                 }
+                $candidate_full_url = wp_get_attachment_image_url($image_id, 'full');
+                if (is_string($candidate_full_url)) {
+                    $image_full_url = $candidate_full_url;
+                }
                 if ($image_alt === '') {
                     $candidate_alt = get_post_meta($image_id, '_wp_attachment_image_alt', true);
                     if (is_string($candidate_alt)) {
@@ -186,6 +191,7 @@ while (have_posts()) : the_post();
 
             $gallery_items[] = [
                 'url' => $image_url,
+                'full_url' => $image_full_url !== '' ? $image_full_url : $image_url,
                 'alt' => $image_alt,
             ];
 
@@ -193,6 +199,147 @@ while (have_posts()) : the_post();
                 break;
             }
         }
+    }
+
+    $slider_images = [];
+    $slider_seen_urls = [];
+
+    $extract_slider_images_from_html = static function (string $html): array {
+        if ($html === '') {
+            return [];
+        }
+
+        $images = [];
+        $matches = [];
+        preg_match_all('/<img[^>]*>/i', $html, $matches);
+
+        if (! isset($matches[0]) || ! is_array($matches[0])) {
+            return [];
+        }
+
+        foreach ($matches[0] as $tag) {
+            if (! is_string($tag) || $tag === '') {
+                continue;
+            }
+
+            $src = '';
+            $full_url = '';
+            $alt = '';
+            $image_id = 0;
+
+            if (preg_match('/\ssrc=["\']([^"\']+)["\']/i', $tag, $src_match) === 1 && isset($src_match[1])) {
+                $src = trim((string) $src_match[1]);
+            }
+
+            if (preg_match('/\salt=["\']([^"\']*)["\']/i', $tag, $alt_match) === 1 && isset($alt_match[1])) {
+                $alt = trim((string) $alt_match[1]);
+            }
+
+            if (preg_match('/wp-image-(\d+)/i', $tag, $id_match) === 1 && isset($id_match[1])) {
+                $image_id = absint($id_match[1]);
+            }
+
+            if ($image_id > 0) {
+                $large_url = wp_get_attachment_image_url($image_id, 'large');
+                $candidate_full_url = wp_get_attachment_image_url($image_id, 'full');
+
+                if (is_string($large_url) && $large_url !== '') {
+                    $src = $large_url;
+                }
+
+                if (is_string($candidate_full_url) && $candidate_full_url !== '') {
+                    $full_url = $candidate_full_url;
+                }
+
+                if ($alt === '') {
+                    $candidate_alt = get_post_meta($image_id, '_wp_attachment_image_alt', true);
+                    if (is_string($candidate_alt)) {
+                        $alt = trim($candidate_alt);
+                    }
+                }
+            }
+
+            if ($src === '') {
+                continue;
+            }
+
+            $images[] = [
+                'url' => $src,
+                'full_url' => $full_url !== '' ? $full_url : $src,
+                'alt' => $alt,
+            ];
+
+            if (count($images) === 12) {
+                break;
+            }
+        }
+
+        return $images;
+    };
+
+    foreach ($gallery_items as $gallery_item) {
+        if (! isset($gallery_item['url']) || ! is_string($gallery_item['url']) || $gallery_item['url'] === '') {
+            continue;
+        }
+
+        if (in_array($gallery_item['url'], $slider_seen_urls, true)) {
+            continue;
+        }
+
+        $slider_images[] = [
+            'url' => $gallery_item['url'],
+            'full_url' => isset($gallery_item['full_url']) && is_string($gallery_item['full_url']) && $gallery_item['full_url'] !== '' ? $gallery_item['full_url'] : $gallery_item['url'],
+            'alt' => isset($gallery_item['alt']) && is_string($gallery_item['alt']) ? $gallery_item['alt'] : '',
+        ];
+        $slider_seen_urls[] = $gallery_item['url'];
+    }
+
+    if ($slider_images === []) {
+        $content_sources = [];
+
+        if (is_string($book_description) && trim($book_description) !== '') {
+            $content_sources[] = $book_description;
+        }
+
+        $post_content_raw = (string) get_post_field('post_content', $book_id);
+        if (trim($post_content_raw) !== '') {
+            $content_sources[] = $post_content_raw;
+        }
+
+        foreach ($content_sources as $source_html) {
+            if (! is_string($source_html) || trim($source_html) === '') {
+                continue;
+            }
+
+            $content_images = $extract_slider_images_from_html($source_html);
+            foreach ($content_images as $content_image) {
+                if (! isset($content_image['url']) || ! is_string($content_image['url']) || $content_image['url'] === '') {
+                    continue;
+                }
+
+                if (in_array($content_image['url'], $slider_seen_urls, true)) {
+                    continue;
+                }
+
+                $slider_images[] = [
+                    'url' => $content_image['url'],
+                    'full_url' => isset($content_image['full_url']) && is_string($content_image['full_url']) && $content_image['full_url'] !== '' ? $content_image['full_url'] : $content_image['url'],
+                    'alt' => isset($content_image['alt']) && is_string($content_image['alt']) ? $content_image['alt'] : '',
+                ];
+                $slider_seen_urls[] = $content_image['url'];
+
+                if (count($slider_images) === 12) {
+                    break 2;
+                }
+            }
+        }
+    }
+
+    $book_description_for_display = $book_description;
+    if (is_string($book_description_for_display) && $book_description_for_display !== '') {
+        $book_description_for_display = preg_replace('/<figure\b[^>]*>.*?<\/figure>/is', '', $book_description_for_display);
+        $book_description_for_display = preg_replace('/<img\b[^>]*>/i', '', (string) $book_description_for_display);
+        $book_description_for_display = trim((string) $book_description_for_display);
     }
 
     $buy_links = artbooks_get_buy_links($book_id);
@@ -223,11 +370,55 @@ while (have_posts()) : the_post();
             </nav>
 
             <header class="ab-book-hero">
-                <div class="ab-book-cover">
-                    <?php if (has_post_thumbnail()) : ?>
-                        <?php the_post_thumbnail('large', ['loading' => 'eager']); ?>
-                    <?php else : ?>
-                        <span class="ab-book-cover-placeholder"></span>
+                <div class="ab-book-media">
+                    <div class="ab-book-cover">
+                        <?php if (has_post_thumbnail()) : ?>
+                            <?php the_post_thumbnail('large', ['loading' => 'eager']); ?>
+                        <?php else : ?>
+                            <span class="ab-book-cover-placeholder"></span>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if ($slider_images !== []) : ?>
+                        <section class="ab-product-images-slider-section" aria-label="<?php esc_attr_e('Book preview images', 'artbooks'); ?>">
+                            <div class="ab-product-images-slider" data-ab-book-slider tabindex="0">
+                                <div class="ab-product-images-slider-stage">
+                                    <?php if (count($slider_images) > 1) : ?>
+                                        <button class="ab-product-images-nav ab-product-images-nav-prev" type="button" aria-label="<?php esc_attr_e('Previous image', 'artbooks'); ?>" data-ab-book-slider-prev>&larr;</button>
+                                    <?php endif; ?>
+
+                                    <div class="ab-product-images-track" data-ab-book-slider-track>
+                                        <?php foreach ($slider_images as $index => $image) : ?>
+                                            <figure class="ab-product-image-slide<?php echo $index === 0 ? ' is-active' : ''; ?>" data-ab-book-slider-slide="<?php echo esc_attr((string) $index); ?>">
+                                                <a href="<?php echo esc_url($image['full_url']); ?>">
+                                                    <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" loading="lazy">
+                                                </a>
+                                            </figure>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <?php if (count($slider_images) > 1) : ?>
+                                        <button class="ab-product-images-nav ab-product-images-nav-next" type="button" aria-label="<?php esc_attr_e('Next image', 'artbooks'); ?>" data-ab-book-slider-next>&rarr;</button>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?php if (count($slider_images) > 1) : ?>
+                                    <div class="ab-product-images-thumbs" data-ab-book-slider-thumbs>
+                                        <?php foreach ($slider_images as $index => $image) : ?>
+                                            <button class="ab-product-image-thumb<?php echo $index === 0 ? ' is-active' : ''; ?>" type="button" data-ab-book-slider-thumb="<?php echo esc_attr((string) $index); ?>" aria-label="<?php echo esc_attr(sprintf(__('Open image %d', 'artbooks'), $index + 1)); ?>">
+                                                <img src="<?php echo esc_url($image['url']); ?>" alt="" loading="lazy">
+                                            </button>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <div class="ab-product-images-dots" data-ab-book-slider-dots>
+                                        <?php foreach ($slider_images as $index => $image) : ?>
+                                            <button class="ab-product-image-dot<?php echo $index === 0 ? ' is-active' : ''; ?>" type="button" data-ab-book-slider-dot="<?php echo esc_attr((string) $index); ?>" aria-label="<?php echo esc_attr(sprintf(__('Go to image %d', 'artbooks'), $index + 1)); ?>"></button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </section>
                     <?php endif; ?>
                 </div>
 
@@ -247,7 +438,7 @@ while (have_posts()) : the_post();
 
                     <section id="about" class="ab-book-section">
                         <h2><?php esc_html_e('About', 'artbooks'); ?></h2>
-                        <div class="ab-book-richtext"><?php echo wp_kses_post(wpautop($book_description)); ?></div>
+                        <div class="ab-book-richtext"><?php echo wp_kses_post(wpautop($book_description_for_display)); ?></div>
                     </section>
 
                     <section id="author" class="ab-book-section">
