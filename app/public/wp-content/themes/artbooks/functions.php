@@ -31,6 +31,13 @@ function artbooks_enqueue_assets(): void
 
         wp_enqueue_script('artbooks-home-hero-rotator', get_template_directory_uri() . '/assets/js/home-hero-rotator.js', [], $hero_js_version, true);
     }
+
+    if (is_singular('book')) {
+        $slider_js_path = get_template_directory() . '/assets/js/book-images-slider.js';
+        $slider_js_version = file_exists($slider_js_path) ? (string) filemtime($slider_js_path) : '0.1.0';
+
+        wp_enqueue_script('artbooks-book-images-slider', get_template_directory_uri() . '/assets/js/book-images-slider.js', [], $slider_js_version, true);
+    }
 }
 add_action('wp_enqueue_scripts', 'artbooks_enqueue_assets');
 
