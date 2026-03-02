@@ -586,3 +586,223 @@ function artbooks_get_buy_links(int $post_id): array
 
     return [];
 }
+
+function artbooks_book_page_bg_meta_key(string $device): string
+{
+    return '_ab_book_page_bg_' . $device;
+}
+
+function artbooks_get_book_page_backgrounds(int $post_id): array
+{
+    $backgrounds = [
+        'desktop' => '',
+        'mobile' => '',
+    ];
+
+    foreach (['desktop', 'mobile'] as $device) {
+        $value = get_post_meta($post_id, artbooks_book_page_bg_meta_key($device), true);
+
+        if (is_string($value)) {
+            $backgrounds[$device] = trim($value);
+        }
+    }
+
+    return $backgrounds;
+}
+
+function artbooks_register_book_background_meta_box(): void
+{
+    add_meta_box(
+        'artbooks-book-page-background',
+        __('Book Page Background', 'artbooks'),
+        'artbooks_render_book_background_meta_box',
+        'book',
+        'normal',
+        'default'
+    );
+}
+add_action('add_meta_boxes', 'artbooks_register_book_background_meta_box');
+
+function artbooks_render_book_background_meta_box(WP_Post $post): void
+{
+    wp_nonce_field('artbooks_save_book_page_backgrounds', 'artbooks_book_page_backgrounds_nonce');
+
+    $devices = [
+        'desktop' => __('Desktop', 'artbooks'),
+        'mobile' => __('Mobile', 'artbooks'),
+    ];
+
+    echo '<p>' . esc_html__('Set one background for the whole book page. Leave empty to use existing ACF background fields.', 'artbooks') . '</p>';
+    echo '<div class="ab-book-bg-grid">';
+    echo '<section class="ab-book-bg-card">';
+
+    foreach ($devices as $device_key => $device_label) {
+        $meta_key = artbooks_book_page_bg_meta_key($device_key);
+        $current_url = get_post_meta($post->ID, $meta_key, true);
+        $value = is_string($current_url) ? trim($current_url) : '';
+
+        echo '<label class="ab-book-bg-field">';
+        echo '<span>' . esc_html($device_label) . '</span>';
+        echo '<input type="url" class="widefat" name="' . esc_attr($meta_key) . '" value="' . esc_attr($value) . '" data-ab-media-url>';
+        echo '<div class="ab-book-bg-actions">';
+        echo '<button type="button" class="button" data-ab-media-open>' . esc_html__('Choose image', 'artbooks') . '</button>';
+        echo '<button type="button" class="button-link-delete" data-ab-media-clear>' . esc_html__('Remove', 'artbooks') . '</button>';
+        echo '</div>';
+        echo '<div class="ab-book-bg-preview" data-ab-media-preview' . ($value !== '' ? ' style="background-image:url(' . esc_url($value) . ');"' : '') . '></div>';
+        echo '</label>';
+    }
+
+    echo '</section>';
+    echo '</div>';
+}
+
+function artbooks_save_book_background_meta_box(int $post_id): void
+{
+    if (! isset($_POST['artbooks_book_page_backgrounds_nonce'])) {
+        return;
+    }
+
+    $nonce_raw = wp_unslash($_POST['artbooks_book_page_backgrounds_nonce']);
+    $nonce = is_string($nonce_raw) ? sanitize_text_field($nonce_raw) : '';
+
+    if (! wp_verify_nonce($nonce, 'artbooks_save_book_page_backgrounds')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (! current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    foreach (['desktop', 'mobile'] as $device) {
+        $meta_key = artbooks_book_page_bg_meta_key($device);
+
+        if (! isset($_POST[$meta_key])) {
+            delete_post_meta($post_id, $meta_key);
+            continue;
+        }
+
+        $raw_value = wp_unslash($_POST[$meta_key]);
+        $value = is_string($raw_value) ? trim($raw_value) : '';
+        $sanitized = $value !== '' ? esc_url_raw($value) : '';
+
+        if ($sanitized === '') {
+            delete_post_meta($post_id, $meta_key);
+        } else {
+            update_post_meta($post_id, $meta_key, $sanitized);
+        }
+    }
+}
+add_action('save_post_book', 'artbooks_save_book_background_meta_box');
+
+function artbooks_enqueue_book_admin_assets(string $hook): void
+{
+    if (! in_array($hook, ['post.php', 'post-new.php'], true)) {
+        return;
+    }
+
+    $screen = get_current_screen();
+    if (! ($screen instanceof WP_Screen) || $screen->post_type !== 'book') {
+        return;
+    }
+
+    wp_enqueue_media();
+    wp_enqueue_script('jquery');
+
+    wp_add_inline_script('jquery', <<<'JS'
+jQuery(function ($) {
+  const createFrame = () => wp.media({
+    title: 'Choose background image',
+    button: { text: 'Use image' },
+    multiple: false,
+    library: { type: 'image' }
+  });
+
+  $(document).on('click', '[data-ab-media-open]', function () {
+    const $field = $(this).closest('.ab-book-bg-field');
+    const $input = $field.find('[data-ab-media-url]');
+    const $preview = $field.find('[data-ab-media-preview]');
+    const frame = createFrame();
+
+    frame.on('select', function () {
+      const attachment = frame.state().get('selection').first().toJSON();
+      if (!attachment || !attachment.url) {
+        return;
+      }
+
+      $input.val(attachment.url);
+      $preview.css('background-image', 'url(' + attachment.url + ')').addClass('is-visible');
+    });
+
+    frame.open();
+  });
+
+  $(document).on('click', '[data-ab-media-clear]', function () {
+    const $field = $(this).closest('.ab-book-bg-field');
+    $field.find('[data-ab-media-url]').val('');
+    $field.find('[data-ab-media-preview]').css('background-image', 'none').removeClass('is-visible');
+  });
+
+  $('[data-ab-media-preview]').each(function () {
+    const image = $(this).css('background-image');
+    if (image && image !== 'none') {
+      $(this).addClass('is-visible');
+    }
+  });
+});
+JS);
+
+    wp_register_style('artbooks-book-admin-meta', false);
+    wp_enqueue_style('artbooks-book-admin-meta');
+    wp_add_inline_style('artbooks-book-admin-meta', <<<'CSS'
+.ab-book-bg-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.ab-book-bg-card {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.ab-book-bg-field {
+  display: block;
+  margin-top: 10px;
+}
+
+.ab-book-bg-field > span {
+  display: inline-block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.ab-book-bg-actions {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ab-book-bg-preview {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 90px;
+  border: 1px dashed #c3c4c7;
+  border-radius: 4px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.ab-book-bg-preview.is-visible {
+  border-style: solid;
+}
+CSS);
+}
+add_action('admin_enqueue_scripts', 'artbooks_enqueue_book_admin_assets');
