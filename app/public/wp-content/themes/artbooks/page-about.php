@@ -7,6 +7,12 @@ get_header();
 ?>
 <section class="ab-about-page">
     <div class="ab-container">
+        <nav class="ab-about-crumbs" aria-label="<?php esc_attr_e('Breadcrumb', 'artbooks'); ?>">
+            <a href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'artbooks'); ?></a>
+            <span aria-hidden="true">/</span>
+            <span><?php esc_html_e('About', 'artbooks'); ?></span>
+        </nav>
+
         <article class="ab-about-article">
             <h1>About Us</h1>
 
